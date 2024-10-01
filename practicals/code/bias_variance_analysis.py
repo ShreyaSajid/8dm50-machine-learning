@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from sklearn.utils import resample
 from sklearn.linear_model import Lasso
+
 
 def bias_variance_analysis(X, y, alpha_values, n_bootstrap=100, top_n_features=10):
     """
@@ -20,7 +22,6 @@ def bias_variance_analysis(X, y, alpha_values, n_bootstrap=100, top_n_features=1
 
     None. It plots the Lasso regression coefficients of the top features for different alpha values, including error bars representing variability across bootstrap samples.
     """
-    
     
     # Store the coefficients for each bootstrap sample and for different alpha values
     coefficients = np.zeros((n_bootstrap, len(alpha_values), X.shape[1]))
