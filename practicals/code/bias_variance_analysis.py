@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 from sklearn.utils import resample
 from sklearn.linear_model import Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
 
 def bias_variance_analysis(X, y, alpha_values, n_bootstrap=100, top_n_features=10):
@@ -10,29 +11,29 @@ def bias_variance_analysis(X, y, alpha_values, n_bootstrap=100, top_n_features=1
     Performs bias-variance analysis on Lasso regression coefficients using bootstrap resampling and visualizes the effect of regularization.
 
     Parameters:
-
     - X: Feature Dataframe.
     - y: Response vector Dataframe.
     - alpha_values: Array of regularization (alpha) values to use for Lasso regression.
     - n_bootstrap: Number of bootstrap samples to use for bias-variance analysis (default=100).
     - top_n_features: Number of features to visualize in the plot based on their mean coefficient magnitude (default = 10).
-	- random_state (int or None): Random seed for reproducibility.
  
     Returns:
-
     None. It plots the Lasso regression coefficients of the top features for different alpha values, including error bars representing variability across bootstrap samples.
     """
     
     # Store the coefficients for each bootstrap sample and for different alpha values
     coefficients = np.zeros((n_bootstrap, len(alpha_values), X.shape[1]))
 
-    # Perform bootstrap sampling and fit Lasso for different alphas
+     # Pipeline to perform bootstrap sampling and fit Lasso for different alphas after scaling features
     for i in range(n_bootstrap):
         X_resampled, y_resampled = resample(X, y)
         for j, alpha in enumerate(alpha_values):
-            lasso = Lasso(alpha=alpha)
-            lasso.fit(X_resampled, y_resampled)
-            coefficients[i, j, :] = lasso.coef_
+            lasso_pipeline = Pipeline([
+                ('scaler', StandardScaler()),  # Step to scale the features
+                ('lasso', Lasso(alpha=alpha))  # Lasso regression step
+            ])
+            lasso_pipeline.fit(X_resampled, y_resampled)
+            coefficients[i, j, :] = lasso_pipeline.named_steps['lasso'].coef_
 
     # Calculate the mean and standard deviation of the coefficients across bootstrap samples
     coef_mean = np.mean(coefficients, axis=0)
@@ -54,3 +55,4 @@ def bias_variance_analysis(X, y, alpha_values, n_bootstrap=100, top_n_features=1
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.grid(True)
     plt.show()
+
