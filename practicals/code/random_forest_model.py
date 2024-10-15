@@ -13,7 +13,7 @@ def train_random_forest(X_train, y_train, param_grid, random_state=333):
     :return: GridSearchCV fitted model
     """
     rf_model = RandomForestClassifier(random_state=random_state)
-    rf_grid = GridSearchCV(rf_model, param_grid, refit=True, verbose=0, cv=5)
+    rf_grid = GridSearchCV(rf_model, param_grid, refit=True, verbose=2, cv=5)
     rf_grid.fit(X_train, y_train.ravel())  # Flatten y_train to avoid DataConversionWarning
     return rf_grid
 
@@ -38,6 +38,10 @@ def plot_feature_importances(rf_grid, feature_names, top_n=50):
     :param top_n: Number of top features to plot
     """
     feature_importances = rf_grid.best_estimator_.feature_importances_
+    
+    top_n = min(top_n, len(feature_importances))
+    
+    # Get indices of the top features
     top_indices = np.argsort(feature_importances)[-top_n:]
     top_importances = feature_importances[top_indices]
     top_feature_names = [feature_names[i] for i in top_indices]
@@ -51,3 +55,4 @@ def plot_feature_importances(rf_grid, feature_names, top_n=50):
     plt.ylabel("Feature Name")
     plt.title(f"Top {top_n} Informative Features - Random Forest")
     plt.show()
+
